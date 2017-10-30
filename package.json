@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/LCJ-MinYa/FollowPrice#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
     "node-schedule": "^1.2.5",
     "request": "^2.83.0"
   }
