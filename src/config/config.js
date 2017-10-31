@@ -4,7 +4,7 @@
  */
 module.exports = {
 	PRICE: [{
-		url: 'https://item.com/4466792.html',
+		url: 'https://item.jd.com/4466792.html',
 		price: 2199,
 		name: 'AMD 1700x'
 	}, {

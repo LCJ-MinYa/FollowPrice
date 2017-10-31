@@ -7,10 +7,12 @@ var Price = require("./method/price.js");
 /*--发送邮件--*/
 var Mail = require('./method/mail.js');
 
-Price.getProductPrice();
-
 // Schedule.scheduleJob('1 * * * * *', function() {
-// 	console.log('测试打印输出', new Date());
+Price.getProductPrice(function(priceMsgArr) {
+	var mailDom = '';
+	for (var i = 0; i < priceMsgArr.length; i++) {
+		mailDom += '<p>' + priceMsgArr[i] + '</p>';
+	}
+	Mail.sendMail('商品价格推送', mailDom);
+});
 // });
-
-// Mail.sendMail('测试发邮件', '<p>Hello world!</p>');

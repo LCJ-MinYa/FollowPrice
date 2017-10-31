@@ -40,54 +40,71 @@ var getJDProductId = function(str) {
  * @param {number} price：期望达到的价格，达到该价格发送邮件通知
  * @return {[object]} [JSON Object]
  */
-var getProductPrice = function() {
-	for (var i = 0; i < Config.PRICE.length; i++) {
-		//JD商品
-		if (Config.PRICE[i].url.indexOf('jd.com') > -1) {
-			var productId = getJDProductId(Config.PRICE[i].url);
-			Request(Config.JD + productId, function(error, response, body) {
-				if (!error && response.statusCode == 200) {
-					console.log(JSON.parse(body)[0].p);
-				} else {
-					console.log('请求JD商品' + Config.PRICE[i].name + '失败', error);
-				}
-			});
-			continue;
-		}
+var getProductPrice = function(callback) {
+	var priceMsg = [];
+	var count = 0;
 
-		//TMALL商品
-		if (Config.PRICE[i].url.indexOf('tmall.com') > -1) {
-			var parseJson = parseURI(Config.PRICE[i].url);
-			var productId = parseJson.id;
-			var skuId = parseJson.skuId;
-			console.log(skuId);
-			var options = {
-				url: Config.TMALL + productId,
-				headers: {
-					'referer': Config.TMALL_REFERER + productId
-				}
-			}
-			Request(options, function(error, response, body) {
-				var data = JSON.parse(body);
-				var priceInfo = data.defaultModel.itemPriceResultDO.priceInfo;
-				console.log(priceInfo);
-				for (var j in priceInfo) {
-					console.log(j);
-					if (j == skuId) {
-						if (priceInfo[j].promotionList && priceInfo[j].promotionList.length != 0) {
-							console.log(priceInfo[j].promotionList[0].price, '--------');
-						} else {
-							console.log(priceInfo[j].price, '++++++++++');
-						}
+	var returnArr = function() {
+		if (count == Config.PRICE.length) {
+			callback(priceMsg);
+		}
+	}
+
+	for (var i = 0; i < Config.PRICE.length; i++) {
+
+		(function(i) {
+			//JD商品
+			if (Config.PRICE[i].url.indexOf('jd.com') > -1) {
+				var productId = getJDProductId(Config.PRICE[i].url);
+
+				Request(Config.JD + productId, function(error, response, body) {
+					if (!error && response.statusCode == 200) {
+						var price = JSON.parse(body)[0].p;
+						priceMsg.push(Config.PRICE[i].name + '的price为' + price);
+						count++;
+						returnArr();
 					} else {
-						console.log('skuid不相等');
+						console.log('请求JD商品' + Config.PRICE[i].name + '失败', error);
+					}
+				});
+			}
+
+			//TMALL商品
+			else if (Config.PRICE[i].url.indexOf('tmall.com') > -1) {
+				var parseJson = parseURI(Config.PRICE[i].url);
+				var productId = parseJson.id;
+				var skuId = parseJson.skuId;
+				var options = {
+					url: Config.TMALL + productId,
+					headers: {
+						'referer': Config.TMALL_REFERER + productId
 					}
 				}
-			})
-			continue;
-		}
 
-		console.log('暂不支持非京东，天猫商品');
+				Request(options, function(error, response, body) {
+					var data = JSON.parse(body);
+					var priceInfo = data.defaultModel.itemPriceResultDO.priceInfo;
+					for (var j in priceInfo) {
+						if (j == skuId) {
+							var price;
+							if (priceInfo[j].promotionList && priceInfo[j].promotionList.length != 0) {
+								price = priceInfo[j].promotionList[0].price;
+							} else {
+								price = priceInfo[j].price;
+							}
+							priceMsg.push(Config.PRICE[i].name + '的price为' + price);
+							count++;
+							returnArr();
+						}
+					}
+				});
+			} else {
+				count++;
+				returnArr();
+				console.log('暂不支持非京东，天猫商品');
+			}
+		})(i);
+
 	}
 }
 
