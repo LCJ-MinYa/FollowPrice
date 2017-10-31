@@ -6,6 +6,25 @@ var Request = require("request");
 var Config = require('../config/config.js');
 
 /**
+ * [parseURI 解析URL，可获得相关参数]
+ * @description [url中拼接的参数在params中]
+ * @param  {[string]} url [需要解析的url，node中必选]
+ * @return {[object]} [对象返回url中的相关参数信息]
+ */
+var parseURI = function(url) {
+	var query = {};
+	var urlArr = url.split('?');
+	if (urlArr.length > 1) {
+		var queryArr = urlArr[1].split('&');
+		for (var i = 0; i < queryArr.length; i++) {
+			var someKeyValue = queryArr[i].split('=');
+			query[someKeyValue[0]] = someKeyValue[1];
+		}
+	}
+	return query;
+}
+
+/**
  * [getJDProductId 获取JD商品ID]
  * @return {String} ID: 商品ID
  */
@@ -38,20 +57,30 @@ var getProductPrice = function() {
 
 		//TMALL商品
 		if (Config.PRICE[i].url.indexOf('tmall.com') > -1) {
+			var parseJson = parseURI(Config.PRICE[i].url);
+			var productId = parseJson.id;
+			var skuId = parseJson.skuId;
+			console.log(skuId);
 			var options = {
-				url: 'https://mdskip.taobao.com/core/initItemDetail.htm?itemId=541799568460',
+				url: Config.TMALL + productId,
 				headers: {
-					'referer': 'https://detail.tmall.com/item.htm?id=541799568460'
+					'referer': Config.TMALL_REFERER + productId
 				}
 			}
 			Request(options, function(error, response, body) {
 				var data = JSON.parse(body);
 				var priceInfo = data.defaultModel.itemPriceResultDO.priceInfo;
-				for (var i in priceInfo) {
-					if (priceInfo[i].promotionList && priceInfo[i].promotionList.length != 0) {
-						console.log(priceInfo[i].promotionList[0].price);
+				console.log(priceInfo);
+				for (var j in priceInfo) {
+					console.log(j);
+					if (j == skuId) {
+						if (priceInfo[j].promotionList && priceInfo[j].promotionList.length != 0) {
+							console.log(priceInfo[j].promotionList[0].price, '--------');
+						} else {
+							console.log(priceInfo[j].price, '++++++++++');
+						}
 					} else {
-						console.log(priceInfo[i].price);
+						console.log('skuid不相等');
 					}
 				}
 			})
