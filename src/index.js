@@ -1,9 +1,14 @@
 'use strict';
 
-var schedule = require('node-schedule');
+/*--定时任务--*/
+var Schedule = require('node-schedule');
+/*--请求方法--*/
 var request = require("request");
+/*--发送邮件--*/
+var Mail = require('./method/mail.js');
 
-// schedule.scheduleJob('1 * * * * *', function() {
+
+// Schedule.scheduleJob('1 * * * * *', function() {
 // 	console.log('测试打印输出', new Date());
 // });
 
@@ -35,5 +40,7 @@ var req = function(url) {
 		}
 	})
 }
-req();
+
 // req('http://p.3.cn/prices/mgets?type=1&skuIds=1951426058');
+
+// Mail.sendMail('测试发邮件', '<p>Hello world!</p>');
