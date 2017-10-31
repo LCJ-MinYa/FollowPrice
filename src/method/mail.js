@@ -15,7 +15,7 @@ var smtpTransport = Nodemailer.createTransport(Config.MAIL);
 var sendMail = function(subject, html) {
 	var mailOptions = {
 		from: '希希里岸 <xlzzslzy@163.com>',
-		to: '1049468118@qq.com',
+		to: ['1049468118@qq.com', '546749982@qq.com'],
 		subject: subject,
 		html: html
 	};

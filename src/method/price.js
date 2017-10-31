@@ -61,11 +61,11 @@ var getProductPrice = function(callback) {
 					if (!error && response.statusCode == 200) {
 						var price = JSON.parse(body)[0].p;
 						priceMsg.push(Config.PRICE[i].name + '的price为' + price);
-						count++;
-						returnArr();
 					} else {
-						console.log('请求JD商品' + Config.PRICE[i].name + '失败', error);
+						priceMsg.push('请求JD商品' + Config.PRICE[i].name + '失败');
 					}
+					count++;
+					returnArr();
 				});
 			}
 
@@ -80,23 +80,30 @@ var getProductPrice = function(callback) {
 						'referer': Config.TMALL_REFERER + productId
 					}
 				}
-
 				Request(options, function(error, response, body) {
-					var data = JSON.parse(body);
-					var priceInfo = data.defaultModel.itemPriceResultDO.priceInfo;
-					for (var j in priceInfo) {
-						if (j == skuId) {
-							var price;
-							if (priceInfo[j].promotionList && priceInfo[j].promotionList.length != 0) {
-								price = priceInfo[j].promotionList[0].price;
-							} else {
-								price = priceInfo[j].price;
+					if (!error && response.statusCode == 200) {
+						try {
+							var data = JSON.parse(body);
+							var priceInfo = data.defaultModel.itemPriceResultDO.priceInfo;
+							for (var j in priceInfo) {
+								if (j == skuId) {
+									var price;
+									if (priceInfo[j].promotionList && priceInfo[j].promotionList.length != 0) {
+										price = priceInfo[j].promotionList[0].price;
+									} else {
+										price = priceInfo[j].price;
+									}
+									priceMsg.push(Config.PRICE[i].name + '的price为' + price);
+								}
 							}
-							priceMsg.push(Config.PRICE[i].name + '的price为' + price);
-							count++;
-							returnArr();
+						} catch (error) {
+							priceMsg.push('请求TMALL商品' + Config.PRICE[i].name + '失败,需要登录,明天再来');
 						}
+					} else {
+						priceMsg.push('请求TMALL商品' + Config.PRICE[i].name + '失败');
 					}
+					count++;
+					returnArr();
 				});
 			} else {
 				count++;
